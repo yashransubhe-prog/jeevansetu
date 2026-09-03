@@ -51,9 +51,10 @@ void main() {
     await tester.tap(find.text('हिन्दी').last);
     await tester.pumpAndSettle();
     expect(find.text('हिन्दी'), findsOneWidget);
+    expect(find.text('लाइट'), findsOneWidget);
     expectNoUnexpectedUiException(tester);
 
-    await tester.tap(find.text('Light'));
+    await tester.tap(find.text('लाइट'));
     await tester.pumpAndSettle();
     expect(find.text('डार्क'), findsOneWidget);
     expectNoUnexpectedUiException(tester);
