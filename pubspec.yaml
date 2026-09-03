@@ -1,7 +1,7 @@
 name: jeevansetu
 description: SIH 2026 PS26001 AI landslide monitoring and disaster response prototype.
 publish_to: 'none'
-version: 1.0.0+1
+version: 2.0.0+2
 
 environment:
   sdk: '>=3.4.0 <4.0.0'
@@ -19,3 +19,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/hero_mountain.jpg
+    - assets/images/monitoring_mountain.jpg
+    - assets/images/rescue_diver.jpg
