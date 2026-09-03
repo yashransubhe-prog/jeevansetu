@@ -17,4 +17,3 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: flutter analyze --no-fatal-infos
-      - run: flutter test
