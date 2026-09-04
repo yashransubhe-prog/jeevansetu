@@ -1700,3 +1700,122 @@ void _openCall(BuildContext context, NetworkIncident incident, Color accent, boo
 void _toast(BuildContext context, String text) {
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text), behavior: SnackBarBehavior.floating));
 }
+
+
+class CitizenResponseMessenger extends StatefulWidget {
+  const CitizenResponseMessenger({super.key});
+
+  @override
+  State<CitizenResponseMessenger> createState() => _CitizenResponseMessengerState();
+}
+
+class _CitizenResponseMessengerState extends State<CitizenResponseMessenger> {
+  final TextEditingController field = TextEditingController();
+
+  @override
+  void dispose() {
+    field.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF3F8FA),
+      appBar: AppBar(
+        title: const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text('Response Messenger', style: TextStyle(fontWeight: FontWeight.w900)),
+          Text('All 5 roles · shared incident room', style: TextStyle(fontSize: 10, color: Colors.black54)),
+        ]),
+      ),
+      body: ValueListenableBuilder<List<NetworkIncident>>(
+        valueListenable: JeevanNetwork.instance.incidents,
+        builder: (context, incidents, _) {
+          final incident = incidents.first;
+          return Column(children: [
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(colors: [_deep, _navy]),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Row(children: [
+                  Text(incident.id, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
+                  const Spacer(),
+                  const Text('● LIVE', style: TextStyle(color: _green, fontSize: 10, fontWeight: FontWeight.w900)),
+                ]),
+                const SizedBox(height: 5),
+                Text(incident.title, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w900)),
+                const SizedBox(height: 8),
+                const Wrap(spacing: 6, runSpacing: 6, children: [
+                  _RolePill('Citizen', _green), _RolePill('Authority', _blue), _RolePill('Rescue', _red), _RolePill('Volunteer', _purple), _RolePill('Organization', _orange),
+                ]),
+              ]),
+            ),
+            Expanded(child: ValueListenableBuilder<List<NetworkMessage>>(
+              valueListenable: JeevanNetwork.instance.messages,
+              builder: (context, messages, _) {
+                final relevant = messages.where((m) => m.incidentId == incident.id).toList().reversed.toList();
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  itemCount: relevant.length,
+                  itemBuilder: (_, i) {
+                    final m = relevant[i];
+                    final mine = m.sender == 'Citizen';
+                    return Align(
+                      alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
+                      child: Container(
+                        constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * .78),
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.all(11),
+                        decoration: BoxDecoration(color: mine ? const Color(0xFFDDF6F0) : Colors.white, borderRadius: BorderRadius.circular(16)),
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text(m.sender, style: TextStyle(color: mine ? _green : _blue, fontSize: 9, fontWeight: FontWeight.w900)),
+                          const SizedBox(height: 3),
+                          Text(m.text, style: const TextStyle(fontSize: 11.5, height: 1.35)),
+                        ]),
+                      ),
+                    );
+                  },
+                );
+              },
+            )),
+            SafeArea(top: false, child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Row(children: [
+                Expanded(child: TextField(controller: field, decoration: InputDecoration(hintText: 'Message all response roles…', filled: true, fillColor: Colors.white, border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none)))),
+                const SizedBox(width: 7),
+                IconButton.filled(
+                  style: IconButton.styleFrom(backgroundColor: _navy),
+                  onPressed: () {
+                    final text = field.text.trim();
+                    if (text.isEmpty) return;
+                    JeevanNetwork.instance.addMessage(incident.id, 'Citizen', text);
+                    JeevanNetwork.instance.addEvent(incident.id, 'Citizen', 'Citizen posted a response-room update', _green);
+                    field.clear();
+                  },
+                  icon: const Icon(Icons.send_rounded, color: Colors.white),
+                ),
+              ]),
+            )),
+          ]);
+        },
+      ),
+    );
+  }
+}
+
+class _RolePill extends StatelessWidget {
+  final String label;
+  final Color color;
+  const _RolePill(this.label, this.color);
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+    decoration: BoxDecoration(color: color.withOpacity(.16), borderRadius: BorderRadius.circular(20), border: Border.all(color: color.withOpacity(.45))),
+    child: Text(label, style: const TextStyle(color: Colors.white, fontSize: 8.5, fontWeight: FontWeight.w800)),
+  );
+}

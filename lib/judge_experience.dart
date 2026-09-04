@@ -1,8 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' show LatLng;
 
@@ -49,7 +53,7 @@ class _JudgeJeevanSetuAppState extends State<JudgeJeevanSetuApp> {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'JeevanSetu',
-        themeMode: mode,
+        themeMode: ThemeMode.light,
         theme: ThemeData(
           useMaterial3: true,
           scaffoldBackgroundColor: bg,
@@ -596,7 +600,6 @@ class FoundationControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pref = AppPreferences.of(context);
-    final dark = pref.mode == ThemeMode.dark;
     return Row(
       children: [
         Expanded(
@@ -604,75 +607,33 @@ class FoundationControls extends StatelessWidget {
             color: const Color(0xFF0B3541),
             initialValue: pref.language,
             onSelected: pref.setLanguage,
-            itemBuilder: (_) => AppLanguage.values
-                .map(
-                  (language) => PopupMenuItem<AppLanguage>(
-                    value: language,
-                    child: Text(
-                      language.label,
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ),
-                )
-                .toList(),
+            itemBuilder: (_) => AppLanguage.values.map((language) => PopupMenuItem<AppLanguage>(
+              value: language,
+              child: Text(language.label, style: const TextStyle(color: Colors.white)),
+            )).toList(),
             child: GlassControl(
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.translate_rounded,
-                    color: Colors.white,
-                    size: 20,
-                  ),
+                  const Icon(Icons.translate_rounded, color: Colors.white, size: 20),
                   const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      pref.language.label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
-                  const Icon(
-                    Icons.keyboard_arrow_down_rounded,
-                    color: Colors.white60,
-                  ),
+                  Expanded(child: Text(pref.language.label, maxLines: 1, overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900))),
+                  const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white60),
                 ],
               ),
             ),
           ),
         ),
         const SizedBox(width: 9),
-        Expanded(
-          child: GestureDetector(
-            onTap: () => pref.setMode(
-              dark ? ThemeMode.light : ThemeMode.dark,
-            ),
-            child: GlassControl(
-              child: Row(
-                children: [
-                  Icon(
-                    dark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
-                    color: Colors.white,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      dark ? 'Dark' : 'Light',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
-                  const Icon(
-                    Icons.swap_horiz_rounded,
-                    color: Colors.white54,
-                  ),
-                ],
-              ),
+        const Expanded(
+          child: GlassControl(
+            child: Row(
+              children: [
+                Icon(Icons.visibility_rounded, color: Colors.white),
+                SizedBox(width: 8),
+                Expanded(child: Text('High visibility', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900))),
+                Icon(Icons.verified_rounded, color: Color(0xFF57E1E8)),
+              ],
             ),
           ),
         ),
@@ -2056,7 +2017,13 @@ class _CitizenSosState extends State<CitizenSos>
     super.dispose();
   }
 
-  void send() {
+  Future<void> send() async {
+    JeevanNetwork.instance.reportCitizenIncident('SOS · $emergency · $people people${medical ? ' · medical priority' : ''}');
+    await SystemSound.play(SystemSoundType.alert);
+    final tts = FlutterTts();
+    await tts.setSpeechRate(0.46);
+    await tts.speak('Emergency request sent. JeevanSetu rescue network has been alerted.');
+    if (!mounted) return;
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -3920,24 +3887,63 @@ class SafeRoutePage extends StatefulWidget {
 class _SafeRoutePageState extends State<SafeRoutePage> {
   int route = 0;
 
+  List<LatLng> get selectedRoute => route == 0
+      ? const [
+          LatLng(27.8290, 85.5480), LatLng(27.8238, 85.5410),
+          LatLng(27.8170, 85.5355), LatLng(27.8115, 85.5270),
+          LatLng(27.8060, 85.5190), LatLng(27.7990, 85.5120),
+        ]
+      : const [
+          LatLng(27.8290, 85.5480), LatLng(27.8220, 85.5380),
+          LatLng(27.8140, 85.5290), LatLng(27.8060, 85.5190),
+          LatLng(27.7990, 85.5120),
+        ];
+
   @override
   Widget build(BuildContext context) {
     return DetailPage(
       title: 'Safe Route',
       child: Column(
         children: [
-          Container(
-            height: 230,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(22),
-              gradient: const LinearGradient(
-                colors: [Color(0xFFD9F2EC), Color(0xFFE3EEFA)],
-              ),
-            ),
-            child: CustomPaint(
-              painter: RoutePainter(route),
-              child: const Center(
-                child: Icon(Icons.near_me_rounded, color: navy, size: 34),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(22),
+            child: SizedBox(
+              height: 300,
+              child: Stack(
+                children: [
+                  FlutterMap(
+                    options: const MapOptions(initialCenter: LatLng(27.814, 85.530), initialZoom: 13.2),
+                    children: [
+                      TileLayer(
+                        urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        userAgentPackageName: 'com.jeevansetu.app',
+                      ),
+                      PolygonLayer(polygons: [
+                        Polygon(
+                          points: const [LatLng(27.824,85.526), LatLng(27.829,85.534), LatLng(27.821,85.541), LatLng(27.816,85.532)],
+                          color: red.withValues(alpha: .20), borderColor: red, borderStrokeWidth: 2,
+                        ),
+                      ]),
+                      PolylineLayer(polylines: [
+                        Polyline(points: selectedRoute, strokeWidth: 6, color: route == 0 ? green : orange),
+                      ]),
+                      MarkerLayer(markers: [
+                        Marker(point: selectedRoute.first, width: 48, height: 48,
+                          child: const Icon(Icons.my_location_rounded, color: navy, size: 34)),
+                        Marker(point: selectedRoute.last, width: 52, height: 52,
+                          child: const Icon(Icons.shield_rounded, color: green, size: 40)),
+                      ]),
+                    ],
+                  ),
+                  Positioned(
+                    top: 12, left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                      decoration: BoxDecoration(color: deepNavy.withValues(alpha: .90), borderRadius: BorderRadius.circular(12)),
+                      child: const Text('LIVE SAFE CORRIDOR', style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w900)),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -3945,42 +3951,16 @@ class _SafeRoutePageState extends State<SafeRoutePage> {
           SurfaceCard(
             child: Column(
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: RouteChoice(
-                        active: route == 0,
-                        title: 'Safest',
-                        subtitle: '6.3 km · 18 min',
-                        color: green,
-                        onTap: () => setState(() => route = 0),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: RouteChoice(
-                        active: route == 1,
-                        title: 'Fastest',
-                        subtitle: '5.1 km · 14 min',
-                        color: orange,
-                        onTap: () => setState(() => route = 1),
-                      ),
-                    ),
-                  ],
-                ),
+                Row(children: [
+                  Expanded(child: RouteChoice(active: route == 0, title: 'Safest', subtitle: '6.3 km · 18 min', color: green, onTap: () => setState(() => route = 0))),
+                  const SizedBox(width: 8),
+                  Expanded(child: RouteChoice(active: route == 1, title: 'Fastest', subtitle: '5.1 km · 14 min', color: orange, onTap: () => setState(() => route = 1))),
+                ]),
                 const SizedBox(height: 12),
-                const Row(
-                  children: [
-                    Icon(Icons.shield_rounded, color: green),
-                    SizedBox(width: 7),
-                    Expanded(
-                      child: Text(
-                        'Selected path avoids two active red zones and one blocked bridge.',
-                        style: TextStyle(fontSize: 10.5, height: 1.35),
-                      ),
-                    ),
-                  ],
-                ),
+                const Row(children: [
+                  Icon(Icons.shield_rounded, color: green), SizedBox(width: 7),
+                  Expanded(child: Text('Live route avoids the active red zone and blocked bridge. Pinch and drag the map to inspect the corridor.', style: TextStyle(fontSize: 10.5, height: 1.35))),
+                ]),
               ],
             ),
           ),
@@ -4091,8 +4071,14 @@ class IncidentReportPage extends StatefulWidget {
 
 class _IncidentReportPageState extends State<IncidentReportPage> {
   int type = 0;
-  bool evidence = false;
   bool sent = false;
+  String? evidencePath;
+  final ImagePicker picker = ImagePicker();
+
+  Future<void> pickEvidence(ImageSource source) async {
+    final image = await picker.pickImage(source: source, imageQuality: 78, maxWidth: 1600);
+    if (image != null && mounted) setState(() => evidencePath = image.path);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -4101,76 +4087,68 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
       title: 'Report Incident',
       child: Column(
         children: [
-          SurfaceCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'What do you see?',
-                  style: TextStyle(fontWeight: FontWeight.w900, fontSize: 15),
-                ),
-                const SizedBox(height: 10),
-                Wrap(
-                  spacing: 7,
-                  runSpacing: 7,
-                  children: List.generate(
-                    types.length,
-                    (i) => ChoiceChip(
-                      label: Text(types[i]),
-                      selected: type == i,
-                      onSelected: (_) => setState(() => type = i),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(
-                    evidence ? Icons.verified_rounded : Icons.add_a_photo_rounded,
-                    color: evidence ? green : orange,
-                  ),
-                  title: Text(
-                    evidence ? 'Photo evidence ready' : 'Add photo evidence',
-                    style: const TextStyle(fontWeight: FontWeight.w900),
-                  ),
-                  subtitle: const Text(
-                    'Adds timestamp and approximate location',
-                  ),
-                  onTap: () => setState(() => evidence = !evidence),
-                ),
-              ],
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(colors: [deepNavy, navy]),
+              borderRadius: BorderRadius.circular(22),
             ),
+            child: const Row(children: [
+              CircleAvatar(backgroundColor: Color(0x22FFFFFF), child: Icon(Icons.add_a_photo_rounded, color: aqua)),
+              SizedBox(width: 12),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('Community Evidence', style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w900)),
+                Text('Photo + location + time are shared to the response network', style: TextStyle(color: Colors.white60, fontSize: 10)),
+              ])),
+              LiveBadge(label: 'LIVE'),
+            ]),
           ),
           const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: () {
-                JeevanNetwork.instance.reportCitizenIncident(types[type]);
-                setState(() => sent = true);
-              },
-              icon: Icon(sent ? Icons.check_rounded : Icons.send_rounded),
-              label: Text(
-                sent ? 'Shared with rescue, authority & partners' : 'Submit verified report',
-              ),
-            ),
+          SurfaceCard(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const Text('What do you see?', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 15)),
+              const SizedBox(height: 10),
+              Wrap(spacing: 7, runSpacing: 7, children: List.generate(types.length, (i) => ChoiceChip(
+                label: Text(types[i]), selected: type == i, onSelected: (_) => setState(() => type = i),
+              ))),
+              const SizedBox(height: 14),
+              if (evidencePath != null) ...[
+                ClipRRect(borderRadius: BorderRadius.circular(16), child: Image.file(File(evidencePath!), height: 170, width: double.infinity, fit: BoxFit.cover)),
+                const SizedBox(height: 8),
+                const Row(children: [Icon(Icons.verified_rounded, color: green, size: 18), SizedBox(width: 6), Expanded(child: Text('Evidence ready · timestamp + GPS context attached', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800)))]),
+                const SizedBox(height: 8),
+              ],
+              Row(children: [
+                Expanded(child: OutlinedButton.icon(onPressed: () => pickEvidence(ImageSource.camera), icon: const Icon(Icons.camera_alt_rounded), label: const Text('Camera'))),
+                const SizedBox(width: 8),
+                Expanded(child: OutlinedButton.icon(onPressed: () => pickEvidence(ImageSource.gallery), icon: const Icon(Icons.photo_library_rounded), label: const Text('Gallery'))),
+              ]),
+            ]),
           ),
+          const SizedBox(height: 12),
+          SizedBox(width: double.infinity, child: FilledButton.icon(
+            onPressed: () {
+              JeevanNetwork.instance.reportCitizenIncident(types[type]);
+              setState(() => sent = true);
+            },
+            icon: Icon(sent ? Icons.check_rounded : Icons.send_rounded),
+            label: Text(sent ? 'Shared across all 5 roles' : 'Submit verified report'),
+          )),
           if (sent) ...[
             const SizedBox(height: 12),
-            const SurfaceCard(
-              child: Row(
-                children: [
-                  Icon(Icons.auto_awesome_rounded, color: purple),
-                  SizedBox(width: 9),
-                  Expanded(
-                    child: Text(
-                      'AI cross-check started against nearby sensors and duplicate reports.',
-                      style: TextStyle(fontSize: 10.5, height: 1.4),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            SurfaceCard(child: Column(children: [
+              const Row(children: [
+                Icon(Icons.hub_rounded, color: purple), SizedBox(width: 9),
+                Expanded(child: Text('Citizen → Authority → Rescue → Volunteer → Organization', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 11))),
+              ]),
+              const SizedBox(height: 10),
+              const Text('Your report is now one shared incident. Every response role can message and update the same case.', style: TextStyle(fontSize: 10.5, height: 1.4)),
+              const SizedBox(height: 10),
+              SizedBox(width: double.infinity, child: FilledButton.icon(
+                onPressed: () => Navigator.push(context, premiumRoute(const CitizenResponseMessenger())),
+                icon: const Icon(Icons.forum_rounded), label: const Text('Open 5-role response messenger'),
+              )),
+            ])),
           ],
         ],
       ),
