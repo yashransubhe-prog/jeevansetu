@@ -1,0 +1,30 @@
+name: Apply Targeted JeevanSetu Enhancements
+
+on:
+  push:
+    paths:
+      - 'tools/apply_targeted_enhancements.py'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply guarded source patch
+        run: python tools/apply_targeted_enhancements.py
+      - name: Commit generated app changes
+        run: |
+          git config user.name "JeevanSetu Build Bot"
+          git config user.email "actions@github.com"
+          git add lib/judge_experience.dart lib/connected_role_tabs.dart pubspec.yaml
+          if git diff --cached --quiet; then
+            echo "No changes required"
+          else
+            git commit -m "Enhance citizen evidence route SOS and five-role messenger"
+            git push origin HEAD:main
+          fi
