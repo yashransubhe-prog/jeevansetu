@@ -21,6 +21,8 @@ jobs:
           channel: stable
       - name: Apply role-network patch
         run: python .github/scripts/connect_role_network.py
+      - name: Fix connected tab syntax
+        run: python .github/scripts/fix_connected_tabs.py
       - name: Get packages
         run: flutter pub get
       - name: Analyze
@@ -29,6 +31,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add lib/judge_experience.dart
+          git add lib/judge_experience.dart lib/connected_role_tabs.dart
           git commit -m "Connect citizen reports across response roles [skip ci]" || exit 0
           git push origin HEAD:chatgpt/connected-role-network
