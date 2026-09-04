@@ -1,0 +1,31 @@
+name: Professional UX Fix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/fix_professional_upgrade.py'
+      - '.github/workflows/fix_professional_upgrade.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply compile and contrast fixes
+        run: python .github/scripts/fix_professional_upgrade.py
+      - name: Commit fixes
+        run: |
+          if git diff --quiet; then
+            echo "No changes needed"
+            exit 0
+          fi
+          git config user.name "JeevanSetu CI"
+          git config user.email "actions@users.noreply.github.com"
+          git add lib/judge_experience.dart
+          git commit -m "Fix professional role UI compile and dark contrast"
+          git push
