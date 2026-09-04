@@ -1109,16 +1109,38 @@ class RoleNavigation extends StatelessWidget {
     return Scaffold(
       backgroundColor: dark ? const Color(0xFF06151B) : bg,
       body: IndexedStack(index: index, children: pages),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: index,
-        onDestinationSelected: onChanged,
-        backgroundColor: dark ? const Color(0xFF0A222B) : Colors.white,
-        indicatorColor: accent.withValues(alpha: dark ? .24 : .14),
-        destinations: List.generate(
-          labels.length,
-          (i) => NavigationDestination(
-            icon: Icon(icons[i]),
-            label: labels[i],
+      bottomNavigationBar: NavigationBarTheme(
+        data: NavigationBarThemeData(
+          backgroundColor: dark ? const Color(0xFF0A222B) : Colors.white,
+          indicatorColor: accent.withValues(alpha: dark ? .26 : .14),
+          iconTheme: WidgetStateProperty.resolveWith((states) {
+            final selected = states.contains(WidgetState.selected);
+            return IconThemeData(
+              color: selected
+                  ? (dark ? Colors.white : accent)
+                  : (dark ? Colors.white60 : const Color(0xFF53676D)),
+            );
+          }),
+          labelTextStyle: WidgetStateProperty.resolveWith((states) {
+            final selected = states.contains(WidgetState.selected);
+            return TextStyle(
+              color: selected
+                  ? (dark ? Colors.white : navy)
+                  : (dark ? Colors.white60 : const Color(0xFF63757A)),
+              fontSize: 10.5,
+              fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
+            );
+          }),
+        ),
+        child: NavigationBar(
+          selectedIndex: index,
+          onDestinationSelected: onChanged,
+          destinations: List.generate(
+            labels.length,
+            (i) => NavigationDestination(
+              icon: Icon(icons[i]),
+              label: labels[i],
+            ),
           ),
         ),
       ),
@@ -5535,7 +5557,8 @@ class RoleCommunications extends StatelessWidget {
               children: [
                 Text(
                   config.tabs[2],
-                  style: const TextStyle(
+                  style: TextStyle(
+                    color: config.dark ? Colors.white : ink,
                     fontSize: 24,
                     fontWeight: FontWeight.w900,
                   ),
@@ -5545,9 +5568,12 @@ class RoleCommunications extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
-            const Text(
+            Text(
               'In-app voice, video and operational radio',
-              style: TextStyle(color: Colors.black45, fontSize: 10.5),
+              style: TextStyle(
+                color: config.dark ? Colors.white60 : Colors.black54,
+                fontSize: 10.5,
+              ),
             ),
             const SizedBox(height: 16),
             ...rooms.asMap().entries.map(
@@ -6942,7 +6968,21 @@ class _ProfessionalRoleOperationsState extends State<ProfessionalRoleOperations>
                         const SizedBox(height:4),
                         Text(boardSubtitle(widget.role,selected),style:const TextStyle(color:Colors.black54,fontSize:9.5)),
                         const SizedBox(height:10),
-                        Row(children:List.generate(3,(i)=>Expanded(child:Padding(padding:EdgeInsets.only(right:i<2?6:0),child:ChoiceChip(label:Text('${i+1}'),selected:selected==i,onSelected:(_)=>setState(()=>selected=i))))))),
+                        Row(
+                          children: List.generate(
+                            3,
+                            (i) => Expanded(
+                              child: Padding(
+                                padding: EdgeInsets.only(right: i < 2 ? 6 : 0),
+                                child: ChoiceChip(
+                                  label: Text('${i + 1}'),
+                                  selected: selected == i,
+                                  onSelected: (_) => setState(() => selected = i),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ]),
                     ),
                   ),
