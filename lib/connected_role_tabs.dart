@@ -11,7 +11,6 @@ const _green = Color(0xFF20C98A);
 const _orange = Color(0xFFFFA42E);
 const _blue = Color(0xFF4387F4);
 const _purple = Color(0xFF7758DF);
-const _cyan = Color(0xFF14BFD4);
 const _ink = Color(0xFF102027);
 
 class NetworkIncident {
