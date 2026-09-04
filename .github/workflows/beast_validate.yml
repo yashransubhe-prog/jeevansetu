@@ -1,0 +1,35 @@
+name: Beast Validate
+
+on:
+  push:
+    branches:
+      - chatgpt/beast-role-platform
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Analyze and capture output
+        shell: bash
+        run: |
+          set +e
+          flutter analyze --no-fatal-infos > beast_analyze.txt 2>&1
+          code=$?
+          cat beast_analyze.txt
+          echo "$code" > beast_exit_code.txt
+          exit 0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: beast-analyze-log
+          path: |
+            beast_analyze.txt
+            beast_exit_code.txt
