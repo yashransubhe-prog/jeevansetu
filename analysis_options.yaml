@@ -1,0 +1,3 @@
+analyzer:
+  exclude:
+    - lib/premium_v2.dart
