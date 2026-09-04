@@ -1,0 +1,45 @@
+name: Generate App Icons
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'assets/app_icon.png'
+      - 'pubspec.yaml'
+      - '.github/workflows/generate_app_icons.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-icons:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Generate launcher icons
+        run: dart run flutter_launcher_icons
+
+      - name: Commit generated icons
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add android ios web windows macos pubspec.lock || true
+          if git diff --cached --quiet; then
+            echo "No generated icon changes to commit"
+          else
+            git commit -m "Generate JeevanSetu launcher icons"
+            git push
+          fi
