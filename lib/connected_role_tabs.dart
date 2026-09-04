@@ -321,16 +321,176 @@ class ConnectedIntelligenceTab extends StatelessWidget {
 }
 
 class ConnectedToolkitTab extends StatelessWidget {
-  final String roleName; final Color accent; final Color secondary; final Color background; final bool dark;
-  const ConnectedToolkitTab({super.key,required this.roleName,required this.accent,required this.secondary,required this.background,required this.dark});
-  @override Widget build(BuildContext context){final fg=dark?Colors.white:const Color(0xFF102027);final sub=dark?Colors.white60:Colors.black54;final tools=_tools(roleName);return SafeArea(child:Material(color:background,child:ListView(padding:const EdgeInsets.all(16),children:[
-    Text(_toolkitTitle(roleName),style:TextStyle(color:fg,fontSize:24,fontWeight:FontWeight.w900)),Text('Operational tools connected to the same incident network',style:TextStyle(color:sub,fontSize:10.5)),const SizedBox(height:14),
-    Container(height:150,padding:const EdgeInsets.all(18),decoration:BoxDecoration(borderRadius:BorderRadius.circular(24),gradient:LinearGradient(colors:[accent,secondary])),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[const _GlassLabel('READY FOR DEPLOYMENT',color:Colors.white),const Spacer(),Text(_toolkitHero(roleName),style:const TextStyle(color:Colors.white,fontSize:19,fontWeight:FontWeight.w900)),const Text('Actions are recorded in the shared response timeline',style:TextStyle(color:Colors.white70,fontSize:9.5))])),
-    const SizedBox(height:14),
-    GridView.builder(shrinkWrap:true,physics:const NeverScrollableScrollPhysics(),itemCount:tools.length,gridDelegate:const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2,crossAxisSpacing:10,mainAxisSpacing:10,childAspectRatio:1.4),itemBuilder:(_,i){final t=tools[i];return Material(color:dark?const Color(0xFF102A33):Colors.white,borderRadius:BorderRadius.circular(18),child:InkWell(borderRadius:BorderRadius.circular(18),onTap:()=>ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text('${t.$2} action recorded in JeevanSetu network'))),child:Padding(padding:const EdgeInsets.all(13),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Icon(t.$1,color:i.isEven?accent:secondary),const Spacer(),Text(t.$2,style:TextStyle(color:fg,fontWeight:FontWeight.w900,fontSize:12)),Text(t.$3,style:TextStyle(color:sub,fontSize:8.7),maxLines:2,overflow:TextOverflow.ellipsis)])))) ;}),
-    const SizedBox(height:16),
-    ValueListenableBuilder<List<NetworkIncident>>(valueListenable:JeevanNetwork.instance.incidents,builder:(_,items,__)=>Container(padding:const EdgeInsets.all(14),decoration:BoxDecoration(color:dark?const Color(0xFF102A33):Colors.white,borderRadius:BorderRadius.circular(18)),child:Row(children:[Icon(Icons.hub_rounded,color:accent),const SizedBox(width:10),Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text('${items.length} incidents synchronized',style:TextStyle(color:fg,fontWeight:FontWeight.w900)),Text('Citizen · Rescue · Authority · Volunteer · Organization',style:TextStyle(color:sub,fontSize:9))]))]))
-  ]))));}
+  final String roleName;
+  final Color accent;
+  final Color secondary;
+  final Color background;
+  final bool dark;
+
+  const ConnectedToolkitTab({
+    super.key,
+    required this.roleName,
+    required this.accent,
+    required this.secondary,
+    required this.background,
+    required this.dark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final fg = dark ? Colors.white : const Color(0xFF102027);
+    final sub = dark ? Colors.white60 : Colors.black54;
+    final tools = _tools(roleName);
+
+    return SafeArea(
+      child: Material(
+        color: background,
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            Text(
+              _toolkitTitle(roleName),
+              style: TextStyle(
+                color: fg,
+                fontSize: 24,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            Text(
+              'Operational tools connected to the same incident network',
+              style: TextStyle(color: sub, fontSize: 10.5),
+            ),
+            const SizedBox(height: 14),
+            Container(
+              height: 150,
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                gradient: LinearGradient(colors: [accent, secondary]),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const _GlassLabel(
+                    'READY FOR DEPLOYMENT',
+                    color: Colors.white,
+                  ),
+                  const Spacer(),
+                  Text(
+                    _toolkitHero(roleName),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 19,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const Text(
+                    'Actions are recorded in the shared response timeline',
+                    style: TextStyle(color: Colors.white70, fontSize: 9.5),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: tools.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                childAspectRatio: 1.4,
+              ),
+              itemBuilder: (context, i) {
+                final tool = tools[i];
+                return Material(
+                  color: dark ? const Color(0xFF102A33) : Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(18),
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            '${tool.$2} action recorded in JeevanSetu network',
+                          ),
+                        ),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(13),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            tool.$1,
+                            color: i.isEven ? accent : secondary,
+                          ),
+                          const Spacer(),
+                          Text(
+                            tool.$2,
+                            style: TextStyle(
+                              color: fg,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 12,
+                            ),
+                          ),
+                          Text(
+                            tool.$3,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(color: sub, fontSize: 8.7),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+            ValueListenableBuilder<List<NetworkIncident>>(
+              valueListenable: JeevanNetwork.instance.incidents,
+              builder: (context, items, _) {
+                return Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: dark ? const Color(0xFF102A33) : Colors.white,
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.hub_rounded, color: accent),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${items.length} incidents synchronized',
+                              style: TextStyle(
+                                color: fg,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            Text(
+                              'Citizen · Rescue · Authority · Volunteer · Organization',
+                              style: TextStyle(color: sub, fontSize: 9),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class NetworkCallPage extends StatefulWidget {
@@ -338,7 +498,7 @@ class NetworkCallPage extends StatefulWidget {
   const NetworkCallPage({super.key,required this.title,required this.color,required this.video});
   @override State<NetworkCallPage> createState()=>_NetworkCallPageState();
 }
-class _NetworkCallPageState extends State<NetworkCallPage>{bool muted=false;bool camera=true;int seconds=0;Timer? timer;@override void initState(){super.initState();timer=Timer.periodic(const Duration(seconds:1),(_){if(mounted)setState(()=>seconds++);});}@override void dispose(){timer?.cancel();super.dispose();}@override Widget build(BuildContext context){final m=(seconds~/60).toString().padLeft(2,'0');final s=(seconds%60).toString().padLeft(2,'0');return Scaffold(backgroundColor:const Color(0xFF061820),body:SafeArea(child:Stack(children:[Positioned.fill(child:widget.video&&camera?Image.network('https://commons.wikimedia.org/wiki/Special:Redirect/file/A_helicopter_flying_over_Langtang_region.jpg?width=900',fit:BoxFit.cover,errorBuilder:(_,__,___)=>Container(color:const Color(0xFF0B4352))):Container(decoration:const BoxDecoration(gradient:LinearGradient(colors:[Color(0xFF0B5265),Color(0xFF061820)],begin:Alignment.topCenter,end:Alignment.bottomCenter)))),Positioned.fill(child:Container(color:Colors.black.withOpacity(widget.video?.28:.08))),Padding(padding:const EdgeInsets.all(20),child:Column(children:[Row(children:[IconButton(onPressed:()=>Navigator.pop(context),icon:const Icon(Icons.keyboard_arrow_down_rounded,color:Colors.white)),const Spacer(),const _GlassLabel('SECURE RESPONSE CHANNEL',color:_green)]),const Spacer(),CircleAvatar(radius:42,backgroundColor:widget.color.withOpacity(.25),child:const Icon(Icons.groups_rounded,color:Colors.white,size:42)),const SizedBox(height:12),Text(widget.title,textAlign:TextAlign.center,style:const TextStyle(color:Colors.white,fontSize:23,fontWeight:FontWeight.w900)),Text('$m:$s · connected',style:const TextStyle(color:Colors.white60)),const Spacer(),Row(mainAxisAlignment:MainAxisAlignment.spaceEvenly,children:[_CallButton(icon:muted?Icons.mic_off_rounded:Icons.mic_rounded,label:'Mute',active:muted,onTap:()=>setState(()=>muted=!muted)),if(widget.video)_CallButton(icon:camera?Icons.videocam_rounded:Icons.videocam_off_rounded,label:'Camera',active:!camera,onTap:()=>setState(()=>camera=!camera)),_CallButton(icon:Icons.call_end_rounded,label:'End',active:true,color:_red,onTap:()=>Navigator.pop(context))]),const SizedBox(height:28)]))])));}}
+class _NetworkCallPageState extends State<NetworkCallPage>{bool muted=false;bool camera=true;int seconds=0;Timer? timer;@override void initState(){super.initState();timer=Timer.periodic(const Duration(seconds:1),(_){if(mounted)setState(()=>seconds++);});}@override void dispose(){timer?.cancel();super.dispose();}@override Widget build(BuildContext context){final m=(seconds~/60).toString().padLeft(2,'0');final s=(seconds%60).toString().padLeft(2,'0');return Scaffold(backgroundColor:const Color(0xFF061820),body:SafeArea(child:Stack(children:[Positioned.fill(child:widget.video&&camera?Image.network('https://commons.wikimedia.org/wiki/Special:Redirect/file/A_helicopter_flying_over_Langtang_region.jpg?width=900',fit:BoxFit.cover,errorBuilder:(_,__,___)=>Container(color:const Color(0xFF0B4352))):Container(decoration:const BoxDecoration(gradient:LinearGradient(colors:[Color(0xFF0B5265),Color(0xFF061820)],begin:Alignment.topCenter,end:Alignment.bottomCenter)))),Positioned.fill(child:Container(color:Colors.black.withOpacity(widget.video ? .28 : .08))),Padding(padding:const EdgeInsets.all(20),child:Column(children:[Row(children:[IconButton(onPressed:()=>Navigator.pop(context),icon:const Icon(Icons.keyboard_arrow_down_rounded,color:Colors.white)),const Spacer(),const _GlassLabel('SECURE RESPONSE CHANNEL',color:_green)]),const Spacer(),CircleAvatar(radius:42,backgroundColor:widget.color.withOpacity(.25),child:const Icon(Icons.groups_rounded,color:Colors.white,size:42)),const SizedBox(height:12),Text(widget.title,textAlign:TextAlign.center,style:const TextStyle(color:Colors.white,fontSize:23,fontWeight:FontWeight.w900)),Text('$m:$s · connected',style:const TextStyle(color:Colors.white60)),const Spacer(),Row(mainAxisAlignment:MainAxisAlignment.spaceEvenly,children:[_CallButton(icon:muted?Icons.mic_off_rounded:Icons.mic_rounded,label:'Mute',active:muted,onTap:()=>setState(()=>muted=!muted)),if(widget.video)_CallButton(icon:camera?Icons.videocam_rounded:Icons.videocam_off_rounded,label:'Camera',active:!camera,onTap:()=>setState(()=>camera=!camera)),_CallButton(icon:Icons.call_end_rounded,label:'End',active:true,color:_red,onTap:()=>Navigator.pop(context))]),const SizedBox(height:28)]))])));}}
 
 class _CallButton extends StatelessWidget{final IconData icon;final String label;final bool active;final VoidCallback onTap;final Color? color;const _CallButton({required this.icon,required this.label,required this.active,required this.onTap,this.color});@override Widget build(BuildContext context)=>Column(children:[InkWell(onTap:onTap,borderRadius:BorderRadius.circular(32),child:Container(width:58,height:58,decoration:BoxDecoration(shape:BoxShape.circle,color:color??(active?Colors.white24:Colors.white12)),child:Icon(icon,color:Colors.white))),const SizedBox(height:6),Text(label,style:const TextStyle(color:Colors.white70,fontSize:9))]);}
 class _MapPin extends StatelessWidget{final Color color;final IconData icon;const _MapPin({required this.color,required this.icon});@override Widget build(BuildContext context)=>Container(decoration:BoxDecoration(color:color,shape:BoxShape.circle,border:Border.all(color:Colors.white,width:3),boxShadow:[BoxShadow(color:color.withOpacity(.3),blurRadius:12)]),child:Icon(icon,color:Colors.white,size:20));}

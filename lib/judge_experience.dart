@@ -7,6 +7,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' show LatLng;
 
 import 'app.dart' show LogoMark;
+import 'connected_role_tabs.dart';
 
 const navy = Color(0xFF073C4D);
 const deepNavy = Color(0xFF032833);
@@ -1067,10 +1068,34 @@ class _RoleExperienceShellState extends State<RoleExperienceShell> {
     final config = RoleConfig.forRole(widget.role);
     final pages = <Widget>[
       ProfessionalRoleHome(role: widget.role, config: config),
-      ProfessionalRoleOperations(role: widget.role, config: config),
-      ProfessionalRoleCommunications(role: widget.role, config: config),
-      ProfessionalRoleIntelligence(role: widget.role, config: config),
-      ProfessionalRoleToolkit(role: widget.role, config: config),
+      ConnectedOperationsTab(
+        roleName: widget.role.title,
+        accent: config.accent,
+        secondary: config.secondary,
+        background: config.background,
+        dark: config.dark,
+      ),
+      ConnectedCommunicationsTab(
+        roleName: widget.role.title,
+        accent: config.accent,
+        secondary: config.secondary,
+        background: config.background,
+        dark: config.dark,
+      ),
+      ConnectedIntelligenceTab(
+        roleName: widget.role.title,
+        accent: config.accent,
+        secondary: config.secondary,
+        background: config.background,
+        dark: config.dark,
+      ),
+      ConnectedToolkitTab(
+        roleName: widget.role.title,
+        accent: config.accent,
+        secondary: config.secondary,
+        background: config.background,
+        dark: config.dark,
+      ),
     ];
     return RoleNavigation(
       index: index,
@@ -4120,10 +4145,13 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
-              onPressed: () => setState(() => sent = true),
+              onPressed: () {
+                JeevanNetwork.instance.reportCitizenIncident(types[type]);
+                setState(() => sent = true);
+              },
               icon: Icon(sent ? Icons.check_rounded : Icons.send_rounded),
               label: Text(
-                sent ? 'Report queued for verification' : 'Submit verified report',
+                sent ? 'Shared with rescue, authority & partners' : 'Submit verified report',
               ),
             ),
           ),
