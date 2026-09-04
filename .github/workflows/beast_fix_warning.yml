@@ -1,0 +1,30 @@
+name: Beast Fix Warning
+
+on:
+  push:
+    branches:
+      - chatgpt/beast-role-platform
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chatgpt/beast-role-platform
+      - name: Remove analyzer-blocking unused private constant
+        shell: bash
+        run: |
+          sed -i '/const _cyan = Color(0xFF14BFD4);/d' lib/connected_role_tabs.dart
+          if git diff --quiet; then
+            echo "No patch required"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/connected_role_tabs.dart
+          git commit -m "Fix beast analyzer warning [skip ci]"
+          git push origin HEAD:chatgpt/beast-role-platform
