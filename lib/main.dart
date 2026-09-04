@@ -1,3 +1,3 @@
-import 'beast_app.dart';
+import 'beast/app.dart';
 
 void main() => runBeastApp();
