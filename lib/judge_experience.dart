@@ -2018,11 +2018,16 @@ class _CitizenSosState extends State<CitizenSos>
   }
 
   Future<void> send() async {
-    JeevanNetwork.instance.reportCitizenIncident('SOS · $emergency · $people people${medical ? ' · medical priority' : ''}');
+    JeevanNetwork.instance.reportCitizenIncident(
+      'SOS · $emergency',
+      source: 'Citizen SOS',
+      people: people,
+      medical: medical,
+    );
     await SystemSound.play(SystemSoundType.alert);
     final tts = FlutterTts();
     await tts.setSpeechRate(0.46);
-    await tts.speak('Emergency request sent. JeevanSetu rescue network has been alerted.');
+    await tts.speak('Emergency request sent. Authority, rescue, volunteer and relief teams have been alerted through JeevanSetu.');
     if (!mounted) return;
     showModalBottomSheet<void>(
       context: context,
@@ -4128,7 +4133,13 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
           const SizedBox(height: 12),
           SizedBox(width: double.infinity, child: FilledButton.icon(
             onPressed: () {
-              JeevanNetwork.instance.reportCitizenIncident(types[type]);
+              JeevanNetwork.instance.reportCitizenIncident(
+                types[type],
+                source: 'Citizen evidence',
+                evidencePath: evidencePath,
+                people: 1,
+                medical: false,
+              );
               setState(() => sent = true);
             },
             icon: Icon(sent ? Icons.check_rounded : Icons.send_rounded),
