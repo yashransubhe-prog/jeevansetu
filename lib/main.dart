@@ -1,4 +1,4 @@
 import 'package:flutter/material.dart';
-import 'enhanced_bootstrap.dart';
+import 'premium_v2.dart';
 
-void main() => runApp(const EnhancedJeevanSetuApp());
+void main() => runApp(const JeevanSetuPremiumV2App());
