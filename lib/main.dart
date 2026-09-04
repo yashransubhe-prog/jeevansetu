@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
-import 'judge_experience.dart';
+import 'beast_app.dart';
 
-void main() => runApp(const JudgeJeevanSetuApp());
+void main() => runBeastApp();
