@@ -1,0 +1,31 @@
+name: Enhance Professional Comms
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/enhance_role_comms.py'
+      - '.github/workflows/enhance_role_comms.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  enhance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply professional comms upgrade
+        run: python .github/scripts/enhance_role_comms.py
+      - name: Commit upgrade
+        run: |
+          if git diff --quiet; then
+            echo "No changes needed"
+            exit 0
+          fi
+          git config user.name "JeevanSetu CI"
+          git config user.email "actions@users.noreply.github.com"
+          git add lib/judge_experience.dart
+          git commit -m "Enrich role communication tabs with live channel UI"
+          git push
