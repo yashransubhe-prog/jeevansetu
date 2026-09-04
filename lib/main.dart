@@ -1,4 +1,4 @@
 import 'package:flutter/material.dart';
-import 'premium_v2.dart';
+import 'judge_experience.dart';
 
-void main() => runApp(const JeevanSetuPremiumV2App());
+void main() => runApp(const JudgeJeevanSetuApp());
